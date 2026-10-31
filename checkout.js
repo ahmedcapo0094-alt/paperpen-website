@@ -11,7 +11,7 @@ const auth=getAuth(app), db=getFirestore(app);
 const plans={base:{label:'الباقة الأساسية',key:'base'},extra_employee:{label:'إضافة موظف',key:'extraEmployee'},renewal:{label:'التجديد السنوي',key:'renewal'},extra_employee_renewal:{label:'تجديد الموظف الإضافي',key:'extraRenewal'}};
 const defaultPrices={base:2300,extraEmployee:500,renewal:700,extraRenewal:200};
 const priceFields=['cmsBasePrice','cmsSeatPrice','cmsRenewPrice','cmsSeatRenewPrice'];
-let currentPlan=null,currentUser=null,ready=false,prices=null,payment=null,store=null,storeId=null,profile=null,promoCode='',requestedPrice=0;
+let currentPlan=null,currentUser=null,ready=false,prices=null,payment=null,store=null,storeId=null,profile=null,promoCode='',requestedPrice=0,couponStage='',regularBase=2300;
 const $=id=>document.getElementById(id);
 const money=v=>`${Number(v).toLocaleString('ar-EG')} ج.م`;
 const msg=(text,kind='info')=>{const n=$('ppCheckoutMsg');if(!n)return;n.textContent=text;n.dataset.status=kind;n.hidden=!text;};
@@ -47,22 +47,28 @@ $('ppSendRequest').addEventListener('click',submit);
 function updatePrice(){
 if(!currentPlan||!prices)return;
 const full=prices[plans[currentPlan].key];
-$('ppBasePrice').textContent=money(full);
-// No pre-charge estimate: FB100 is subject to admin verification; do not charge an unapproved amount.
-requestedPrice=full;
-$('ppFinalPrice').textContent=money(full);
+const hasCoupon=currentPlan==='base'&&(promoCode==='FB100'||couponStage==='reserved');
+requestedPrice=hasCoupon?Math.ceil(regularBase*0.6):full;
+$('ppBasePrice').textContent=money(hasCoupon?regularBase:full);
+$('ppFinalPrice').textContent=hasCoupon?`${money(requestedPrice)} (بعد تأكيد الحجز)` : money(full);
 const info=$('ppCouponInfo');
-if(currentPlan!=='base') {info.textContent='كود FB100 خاص بالباقة الأساسية لأول اشتراك فقط.';}
-else if(!promoCode) {info.textContent='لو معاك FB100 اكتبه؛ الخصم 40% للأول 100 محل بعد تأكيد الأهلية. لا تحول مبلغ مخفض قبل المراجعة.';}
-else if(promoCode==='FB100') {info.textContent=`عرض FB100 المقترح: ${money(Math.ceil(full*.6))} بعد التأكد من عدد المستفيدين وأهلية المحل. الطلب المخفض غير متاح للدفع حتى يتم ربط التحقق الآمن.`;}
-else {info.textContent='الكود غير معروف. استخدم FB100 أو احذف الكود.';}
+if(currentPlan!=='base') info.textContent='كود FB100 للباقة الأساسية عند أول اشتراك مدفوع فقط.';
+else if(!promoCode && couponStage!=='reserved') info.textContent='FB100: خصم 40% لأول 100 محل، ويُحجز من الإدارة قبل تحويل الفلوس.';
+else if(promoCode==='FB100'||couponStage==='reserved') info.textContent='الخصم 40%، ويُسمح بتحويل المبلغ المخفض بعد اعتماد حجز الكود من الإدارة فقط.';
+else info.textContent='الكود غير معروف. استخدم FB100 أو امسح الكود.';
+$('ppSendRequest').textContent=hasCoupon&&couponStage!=='reserved'?'احجز خصم FB100 — بدون تحويل فلوس':'أرسلت التحويل — إرسال طلب المراجعة';
+const isReservation=hasCoupon&&couponStage!=='reserved';
+$('ppPayForm')?.classList.toggle('pp-reserving',isReservation);
+for(const id of ['ppPaymentMethods','ppPaymentDestination','ppSender','ppTransferRef']){const el=$(id);if(el){const parent=(id==='ppSender'||id==='ppTransferRef')?el:null;if(parent)parent.disabled=isReservation;else if(id==='ppPaymentMethods')el.hidden=isReservation;else if(id==='ppPaymentDestination')el.hidden=isReservation||el.hidden;}}
 }
+
 async function loadPublicInfo(){
 if(ready)return;
 const [siteSnap,paySnap]=await Promise.all([getDoc(doc(db,'appConfig','site_public')),getDoc(doc(db,'appConfig','payment'))]);
 const p=siteSnap.exists()?siteSnap.data().pricing||{}:{};
 const offer=siteSnap.exists()?siteSnap.data().offer:null;
 prices=Object.fromEntries(Object.entries(defaultPrices).map(([key,value])=>[key,Number(p[key]??value)]));
+regularBase=prices.base;
 if(!Object.values(prices).every(safePrice))throw Error('invalid prices');
 const millis=v=>v?.toMillis?.()??(typeof v==='string'?Date.parse(v):0);
 const now=Date.now(),start=millis(offer?.startsAt),end=millis(offer?.endsAt),percent=Number(offer?.discountPercent);
@@ -95,7 +101,7 @@ drawDestination();
 }
 async function select(plan){
 if(!plans[plan])return;
-build();currentPlan=plan;
+build();currentPlan=plan;couponStage='';
 const box=$('pp-checkout');box.hidden=false;$('ppPlanName').textContent=plans[plan].label;
 $('ppCouponBlock').hidden=plan!=='base';$('ppCoupon').value='';promoCode='';msg('');
 $('ppPayForm').hidden=true;$('ppLoginRequired').hidden=true;
@@ -105,6 +111,16 @@ if(!currentUser){$('ppLoginRequired').hidden=false;msg('سجّل الدخول أ
 await loadPublicInfo();updatePrice();
 await getStore();
 if(store.licenseStatus==='locked')throw Error('locked');
+if(store.activationRequestStatus==='pending'&&store.activationPromoCodeRequested==='FB100'&&plan==='base'){
+  if(store.activationPromoStage==='reservation_pending'){msg('طلب حجز خصم FB100 وصل. لازم الإدارة تحجز لك مكان ضمن أول 100 محل قبل تحويل أي مبلغ.','info');return;}
+  if(store.activationPromoStage==='reservation_confirmed'){
+    couponStage='reserved';promoCode='FB100';$('ppCoupon').value='FB100';$('ppCouponBlock').hidden=true;
+    updatePrice();$('ppPayForm').hidden=false;
+    $('ppAccountState').textContent=`تم حجز خصم FB100 لحساب ${profile.storeName||store.storeName||'محلك'}. المطلوب ${money(requestedPrice)} فقط. حول المبلغ للوسيلة الموضحة ثم ابعت بيانات التحويل.`;
+    drawMethods();return;
+  }
+  if(store.activationPromoStage==='payment_reported'){msg(`طلب الدفع المخفض رقم ${store.activationRequestCode||'—'} بانتظار مراجعة الإدارة والتحقق من وصول التحويل.`, 'info');return;}
+}
 if(store.activationRequestStatus==='pending'){
 msg(`عندك طلب قائم رقم ${store.activationRequestCode||'—'} — ${statusText(store.activationRequestStatus)}. ما تبعتش تحويل جديد قبل مراجعته.`,'info');return;
 }
@@ -121,38 +137,53 @@ msg(labels[err?.message]||'تعذر تحميل بيانات الدفع من Fire
 async function submit(){
 const button=$('ppSendRequest');if(button.disabled||!currentUser||!currentPlan||!storeId||!prices||!payment)return;
 const sender=$('ppSender').value.trim(),reference=$('ppTransferRef').value.trim();
-if(sender.length<5){msg('اكتب بيانات الحساب اللي حولت منه.','error');return;}
-if(currentPlan==='base'&&promoCode&&promoCode!=='FB100'){msg('كود الخصم غير صحيح. صححه أو امسحه.','error');return;}
-if(currentPlan==='base'&&promoCode==='FB100'){
- msg('كود FB100 محتاج تأكيد الأهلية والعدد قبل تحويل مبلغ الخصم. ما تحولش المبلغ قبل التأكيد.','error');return;
-}
-const method=$('ppPaymentMethods').querySelector('input:checked')?.value;
+if(currentPlan==='base'&&promoCode&&promoCode!=='FB100'){msg('كود الخصم غير صحيح.','error');return;}
+const couponRequested=currentPlan==='base'&&promoCode==='FB100';
+const requestingReservation=couponRequested&&couponStage!=='reserved';
+const reportingReserved=couponRequested&&couponStage==='reserved';
+if(!requestingReservation&&sender.length<5){msg('اكتب بيانات الحساب اللي حولت منه.','error');return;}
+const method=requestingReservation?'':$('ppPaymentMethods').querySelector('input:checked')?.value;
 const dest=method==='instapay'?payment.instapayAddress:method==='wallet'?payment.walletNumber:null;
-if(!dest){msg('اختار وسيلة دفع متاحة.','error');return;}
+if(!requestingReservation&&!dest){msg('اختار وسيلة دفع متاحة.','error');return;}
 const requestCode=`PP-${currentPlan==='base'?'BAS':currentPlan==='extra_employee'?'EMP':currentPlan==='renewal'?'REN':'EREN'}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
-button.disabled=true;button.textContent='جاري إرسال طلبك…';msg('');
+button.disabled=true;button.textContent='جاري حفظ الطلب…';msg('');
 try{
 const storeRef=doc(db,'Stores',storeId);
 await runTransaction(db,async tx=>{
  const snap=await tx.get(storeRef);if(!snap.exists())throw Error('store-not-found');
- const s=snap.data();if(s.ownerUid&&s.ownerUid!==currentUser.uid)throw Error('owner-only');
- if(s.licenseStatus==='locked'||s.activationRequestStatus==='pending')throw Error('pending-or-locked');
- if(currentPlan==='base'&&s.licenseStatus==='paid')throw Error('already-paid');
- if(currentPlan!=='base'&&s.licenseStatus!=='paid')throw Error('requires-paid');
+ const st=snap.data();if(st.ownerUid&&st.ownerUid!==currentUser.uid)throw Error('owner-only');
+ if(st.licenseStatus==='locked')throw Error('locked');
+ if(currentPlan==='base'&&st.licenseStatus==='paid')throw Error('already-paid');
+ if(currentPlan!=='base'&&st.licenseStatus!=='paid')throw Error('requires-paid');
+ if(st.activationRequestStatus==='pending'&&!reportingReserved)throw Error('pending');
+ if(reportingReserved){
+   if(st.activationRequestPlan!=='base'||st.activationPromoCodeRequested!=='FB100'||st.activationPromoStage!=='reservation_confirmed')throw Error('unreserved');
+   if(Number(st.activationRequestAmountEgp)!==Math.ceil(regularBase*.6))throw Error('price-mismatch');
+   tx.update(storeRef,{activationPromoStage:'payment_reported',activationPaymentMethod:method,
+     activationPaymentLabel:method==='instapay'?'InstaPay':'محفظة إلكترونية',activationPaymentDestination:dest,
+     activationPaymentSender:sender,activationPaymentReference:reference,
+     activationPaymentReportedAt:serverTimestamp(),updatedAt:serverTimestamp()});
+   return;
+ }
  tx.update(storeRef,{
    activationRequestStatus:'pending',activationRequestPlan:currentPlan,
    activationRequestAmountEgp:requestedPrice,activationRequestCode:requestCode,
    activationRequestEmail:currentUser.email||'',activationRequestedAt:serverTimestamp(),
-   activationPaymentMethod:method,activationPaymentLabel:method==='instapay'?'InstaPay':'محفظة إلكترونية',
-   activationPaymentDestination:dest,activationPaymentSender:sender,
-   activationPaymentReference:reference,activationPromoCodeRequested:'',updatedAt:serverTimestamp()
+   activationPaymentMethod:requestingReservation?'':method,
+   activationPaymentLabel:requestingReservation?'':method==='instapay'?'InstaPay':'محفظة إلكترونية',
+   activationPaymentDestination:requestingReservation?'':dest||'',activationPaymentSender:requestingReservation?'':sender,
+   activationPaymentReference:requestingReservation?'':reference,
+   activationPromoCodeRequested:requestingReservation?'FB100':'',
+   activationPromoStage:requestingReservation?'reservation_pending':'',updatedAt:serverTimestamp()
  });
 });
 $('ppPayForm').hidden=true;
-msg(`تم إرسال طلب الدفع رقم ${requestCode}. الحالة: بانتظار مراجعة الدفع. احتفظ بالمرجع، والتفعيل هيتم بعد مراجعة الإدارة.`, 'ok');
-}catch(e){console.error('checkout request',e.code||e.message);msg('طلب الدفع لم يُحفظ في Firebase. لم يتم إنشاء طلب جديد. راجع صلاحيات الحساب وحاول تاني.','error');}
-finally{button.disabled=false;button.textContent='أرسلت التحويل — إرسال طلب المراجعة';}
+msg(requestingReservation?'تم إرسال طلب حجز خصم FB100. لا تحول فلوس حتى تعتمد الإدارة الحجز، وبعدها افتح الموقع تاني وأكمل دفع السعر المخفض.':
+    `تم إرسال طلب الدفع ${reportingReserved?'المخفض':''}. الحالة: بانتظار مراجعة وصول الفلوس والتفعيل.`, 'ok');
+}catch(e){console.error('checkout request',e.code||e.message);msg('لم يتم حفظ الطلب. راجع تسجيل الدخول وصلاحيات الحساب، ومتحوّليش مبلغ على خصم غير مؤكد.','error');}
+finally{button.disabled=false;updatePrice();}
 }
+
 function init(){build();const q=new URLSearchParams(location.search);const selected=q.get('plan');if(selected&&plans[selected])select(selected);
 onAuthStateChanged(auth,user=>{currentUser=user;if(currentPlan&&$('pp-checkout')&&!$('pp-checkout').hidden)select(currentPlan);});
 }
