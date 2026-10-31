@@ -14,3 +14,5 @@ test -s public/admin/index.html
 test -s public/app/index.html
 test ! -e public/downloads/paper-and-pen.apk
 echo "PaperPen V132 static website prepared. APK stays on AWS."
+
+sed -i '/android-download-link/s/ target="_blank" rel="noopener noreferrer"//g' public/index.html
