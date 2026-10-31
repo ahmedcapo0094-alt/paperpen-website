@@ -30,3 +30,7 @@
 .pp-checkout-message[data-status="ok"]{color:#075e4b;background:#e6faf2;border:1px solid #a6e8cf}
 .pp-checkout-message[data-status="info"]{color:#17445f;background:#e8f4fb;border:1px solid #b9d7e5}
 @media(max-width:560px){.pp-checkout-summary,.pp-checkout-methods{grid-template-columns:1fr}.pp-checkout-stat b{font-size:19px}}
+
+/* Coupon reservation happens before money transfer: show only the call to reserve. */
+#ppPayForm.pp-reserving #ppPaymentMethods,#ppPayForm.pp-reserving #ppPaymentDestination,#ppPayForm.pp-reserving #ppSender,#ppPayForm.pp-reserving #ppTransferRef,#ppPayForm.pp-reserving label[for="ppSender"],#ppPayForm.pp-reserving label[for="ppTransferRef"]{display:none!important}
+#ppPayForm.pp-reserving .pp-checkout-note{font-weight:700}
