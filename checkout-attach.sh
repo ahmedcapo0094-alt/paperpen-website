@@ -21,3 +21,11 @@ if [ -s "$ADMIN" ] && ! grep -q '/checkout-admin.js?v=132-checkout' "$ADMIN"; th
   cp checkout-admin.js public/checkout-admin.js
   sed -i 's|</body>|<script type="module" src="/checkout-admin.js?v=132-checkout-01"></script>\n</body>|' "$ADMIN"
 fi
+
+# Harden the existing admin's manual approval against client-edited payment amounts.
+# Use live CMS prices, not the amount written by a browser, and disallow unsupported plan types.
+if [ -s "$ADMIN" ]; then
+  sed -i 's/if(\["base","extra_employee","renewal"\].includes(p))/if(["base","extra_employee","renewal","extra_employee_renewal"].includes(p))/' "$ADMIN"
+  sed -i '/^  const prompt=plan===/i\  const allowedAmount=plan==="extra_employee"?prices.extraEmployee:plan==="renewal"?prices.renewal:plan==="base"?prices.effectiveBase:null;\n  if(allowedAmount===null){alert("هذه الباقة تحتاج مراجعة تفعيل منفصلة؛ لا تعتمدها كتفعيل أساسي.");return;}\n  if(!Number.isSafeInteger(requestedAmount)||requestedAmount!==allowedAmount){alert("المبلغ المطلوب لا يطابق السعر المعتمد حاليًا. راجع تحويل العميل والسعر الأصلي قبل أي تفعيل.");return;}\n  if(plan==="base"&&s.licenseStatus==="paid"){alert("هذا المحل مشترك بالفعل. راجع نوع الطلب.");return;}\n  if(plan!=="base"&&s.licenseStatus!=="paid"){alert("الإضافة والتجديد يحتاجان اشتراكًا مدفوعًا قائمًا.");return;}' "$ADMIN"
+  grep -q 'allowedAmount=plan===' "$ADMIN"
+fi
