@@ -17,3 +17,187 @@
 @keyframes pp-shine{0%,75%{left:-35%}100%{left:135%}}
 @media(max-width:760px){.download-first{padding:33px 0 38px}.download-first-copy #platformHeadline{font-size:clamp(26px,7vw,36px);margin:18px 0 5px}.download-first-copy .hero-pocket{font-size:clamp(32px,8vw,40px);margin:6px 0 14px}.download-first-copy .trial-launch{font-size:15px;padding:10px 15px;max-width:100%}.download-first-copy #platformCopy{font-size:14px;margin-bottom:18px}.download-first-actions{gap:12px}.download-first-actions .btn{width:100%;min-height:57px;font-size:17px}.simple-promo .promo-card{flex-basis:min(75vw,325px)}}
 @media(prefers-reduced-motion:reduce){.download-first-copy .trial-launch::before{animation:none}.download-first-copy .trial-launch{transition:none}}
+
+
+/* Paper & Pen — V132 landing palette refinement (2026-11-01).
+   Presentation only: no app, admin, Firebase, payment or download logic changes. */
+:root{
+  --navy:#08253f;
+  --navy2:#0d3857;
+  --teal:#10cdd0;
+  --teal2:#11aeb5;
+  --bg:#edf6fa;
+  --text:#0a2b47;
+  --muted:#4f687e;
+  --shadow:0 14px 38px rgba(8,37,63,.10);
+}
+html{scroll-padding-top:80px}
+body{background:#edf6fa;color:var(--text)}
+header{
+  background:linear-gradient(105deg,rgba(7,31,53,.98),rgba(10,56,78,.98));
+  border-bottom:1px solid rgba(111,233,240,.24);
+  box-shadow:0 4px 22px rgba(2,21,38,.17);
+}
+header .brand{color:#fff}
+header .brand b{color:#fff}
+header .brand small{color:#72edf0}
+header .brand img{border:1px solid rgba(104,231,239,.42);box-shadow:0 0 0 2px rgba(14,206,213,.08)}
+header .navlinks{color:#d4edf3}
+header .navlinks a:hover,header .navlinks a:focus-visible{color:#65f0ee}
+header .nav-actions .btn-primary{
+  background:linear-gradient(180deg,#6ef0f4 0%,#19d2d5 53%,#08aeb9 100%);
+  border:1px solid #9cf5fa;color:#052b43;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.84),0 5px 14px rgba(2,22,39,.15);
+}
+header .nav-actions .btn-web-secondary{background:rgba(255,255,255,.1);border-color:rgba(200,252,255,.33);color:#fff}
+
+/* One navy/teal identity through the hero, no washed-out banner. */
+.download-first{
+ background:radial-gradient(ellipse at 50% 4%,rgba(42,168,194,.20),transparent 48%),
+            linear-gradient(150deg,#061e37 0%,#092c4c 55%,#0a3a53 100%);
+ border-bottom:1px solid rgba(90,225,237,.32);
+}
+.download-first-copy{max-width:860px}
+.download-first-copy #platformHeadline{color:#effbff;margin:20px 0 6px;font-weight:900;line-height:1.35}
+.download-first-copy #platformHeadline span{color:#7bf4f5;text-shadow:0 1px 12px rgba(70,225,232,.18)}
+.download-first-copy .hero-pocket{color:#fff;text-shadow:0 2px 1px rgba(0,0,0,.25);margin:8px 0 16px;line-height:1.35}
+.download-first-copy #platformCopy{color:#dceff7;font-size:16px;font-weight:700;line-height:1.7}
+.download-first-note{color:#d1e7f1}
+
+/* The free-trial control: bright metallic outer rim, dark readable middle,
+   clearly separated title and trial limits. Glowing EDGES, not glowing text. */
+.download-first-copy a.trial-launch{
+  isolation:isolate;position:relative;display:inline-flex;
+  flex-direction:column;gap:5px;align-items:center;justify-content:center;
+  width:min(100%,480px);min-height:97px;padding:13px 28px 14px;
+  border:3px solid transparent;border-radius:999px;
+  background:linear-gradient(165deg,#082640 0%,#0d3c58 50%,#082540 100%) padding-box,
+             linear-gradient(125deg,#fff 0%,#52f3f5 16%,#0a9db1 37%,#eaffff 53%,#32f1ef 78%,#fff 100%) border-box;
+  box-shadow:inset 0 2px 2px rgba(255,255,255,.12),inset 0 -4px 12px rgba(0,0,0,.3),
+             0 0 0 3px rgba(41,220,233,.26),0 0 18px 3px rgba(32,220,229,.49),
+             0 9px 25px rgba(0,14,31,.3);
+  color:#fff;text-align:center;text-decoration:none;text-shadow:none;
+  transition:box-shadow .25s ease,transform .25s ease;
+}
+.download-first-copy a.trial-launch .trial-main{
+  position:relative;z-index:2;display:block;padding:0;
+  background:none;color:#fff;font-size:clamp(20px,2.5vw,27px);
+  font-weight:900;line-height:1.35;letter-spacing:0;text-shadow:none;
+}
+.download-first-copy a.trial-launch .trial-limit{
+  position:relative;z-index:2;display:block;
+  padding:3px 17px;border-radius:999px;
+  border:1px solid rgba(183,248,249,.55);
+  background:linear-gradient(180deg,#e7fcff 0%,#8de9ec 100%);
+  color:#092940;font-size:clamp(13px,1.55vw,16px);font-weight:900;line-height:1.4;
+  text-shadow:none;box-shadow:inset 0 1px 1px #fff;
+}
+.download-first-copy a.trial-launch::before{
+ content:"";z-index:1;position:absolute;pointer-events:none;
+ left:-40%;top:-65%;width:22%;height:240%;
+ background:linear-gradient(90deg,transparent,rgba(255,255,255,.13),transparent);
+ transform:skew(-25deg);animation:pp-shine 5.5s ease-in-out infinite;
+}
+.download-first-copy a.trial-launch:focus-visible,.download-first-copy a.trial-launch:hover{
+  outline:2px solid #fff;outline-offset:5px;
+  box-shadow:0 0 0 3px rgba(91,244,244,.42),0 0 30px 5px rgba(45,222,231,.65),0 10px 24px rgba(0,14,31,.3);
+  transform:translateY(-1px);
+}
+.download-first-actions .btn{min-height:60px;font-weight:900;letter-spacing:0;border-radius:999px}
+.download-first-actions .btn-app-download{
+  background:linear-gradient(180deg,#72f1f3,#16c9cf 64%,#0aadb8);
+  color:#072b42;border:2px solid #a5faff;
+  box-shadow:inset 0 1px 1px #fff,0 7px 20px rgba(7,180,187,.26);
+}
+.download-first-actions .hero-secondary{background:linear-gradient(180deg,#305672,#163a59);border:1px solid #7ea9bf;color:#fff}
+.download-first-actions .hero-secondary:hover{border-color:#89eef0;background:#214d6c}
+
+/* Consistent pale-ice sections and crisp white cards, not random grey. */
+.simple-promo{background:linear-gradient(180deg,#e9f5fa 0%,#f7fcff 100%);border-bottom:1px solid #d2e6ee}
+.simple-promo h2,.section-title h2{color:#092e49}
+.simple-promo p,.section-title p{color:#526e82}
+.promo-card,.promo-strip>.promo-card:first-child{
+  background:#fff;border:1px solid #b7dfe8;
+  box-shadow:0 10px 27px rgba(7,50,79,.10);border-radius:22px;
+}
+.promo-strip>.promo-card:first-child{border:2px solid #21cbd3;box-shadow:0 0 0 3px rgba(16,205,208,.10),0 14px 25px rgba(7,50,79,.12)}
+.promo-strip::-webkit-scrollbar-thumb{background:#60bdc9}
+.signup-hero{background:linear-gradient(145deg,#082942,#0a3d56 66%,#092c47);border-top:1px solid rgba(45,201,210,.22)}
+.signup-copy h1,.signup-copy .badge{color:#fff}
+.auth-card{border:1px solid #c3eaf0;box-shadow:0 18px 42px rgba(4,28,47,.25)}
+.auth-head h2{color:#092e49}
+.auth-tabs{background:#e9f4f8;border:1px solid #d8e8f0}
+.auth-tab.active{color:#082942}
+.auth-input{background:#fbfdff;border-color:#c4dbe5;color:#082b45}
+.auth-input:focus{border-color:#13bdc7;box-shadow:0 0 0 3px rgba(16,205,208,.16)}
+.auth-submit,.mini-teal{background:linear-gradient(180deg,#51e8eb,#0ebfc9);color:#062a41}
+.trial-note{background:#eafaff;border:1px solid #9ae8e9;color:#0a455a;font-weight:900}
+
+#pricing{
+ background:linear-gradient(180deg,#f6fbfe 0%,#e7f3f8 100%);
+ color:#092c46;
+}
+#pricing .section-title h2{color:#0a2b45}
+#pricing .price{
+ background:linear-gradient(160deg,#fff 0%,#fbfeff 55%,#f1faff 100%);
+ border:1px solid #c9e1e9;box-shadow:0 10px 28px rgba(9,54,83,.10);
+ border-radius:23px;transition:box-shadow .2s ease,border-color .2s ease;
+}
+#pricing .price.primary{
+ border:2px solid #12c6cf;
+ background:linear-gradient(150deg,#f7ffff 0%,#e6fbfc 100%);
+ box-shadow:0 0 0 2px rgba(19,199,208,.12),0 11px 30px rgba(7,70,91,.15);
+}
+#pricing .price h3{color:#0a2b45;font-weight:900}
+#pricing .price strong{color:#083651;font-weight:900}
+#pricing .price small{color:#536c7e}
+#pricing .section-title p{color:#516a7e}
+
+.compact-policy{background:#e7f3f8}
+.policy-details{background:#f9fdff;border:1px solid #c6dfe8;box-shadow:0 8px 24px rgba(10,46,75,.07)}
+.policy-details summary{color:#092c47}
+.policy-details .policy{background:transparent;box-shadow:none;color:#284457}
+.policy-details .policy p{color:#405d70}
+
+.cta{
+ background:linear-gradient(125deg,#082841 0%,#0c4660 100%);
+ border-top:2px solid #44dce2;color:#fff;
+}
+.cta h2{color:#fff}
+.cta p{color:#d5eef5}
+.cta .btn-dark{background:linear-gradient(180deg,#6af0f0,#14bfca);color:#08314b;border:1px solid #bbfcff}
+.cta .cta-web{color:#fff;background:#1c526c;border:1px solid #87b8c9}
+footer{background:#051c31;color:#bcdbe7;border-top:1px solid rgba(83,227,233,.2)}
+
+/* All interactive controls should clearly announce keyboard focus. */
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #ffd669;outline-offset:4px}
+@media(max-width:760px){
+  .download-first{padding:36px 0 37px}
+  .download-first-copy #platformHeadline{margin:22px 0 6px;font-size:clamp(24px,6vw,34px)}
+  .download-first-copy .hero-pocket{font-size:clamp(29px,8.3vw,42px);margin:8px 0 15px}
+  .download-first-copy #platformCopy{font-size:15px;margin:0 0 23px}
+  .download-first-copy a.trial-launch{width:min(100%,490px);min-height:104px;padding:12px 13px;gap:7px}
+  .download-first-copy a.trial-launch .trial-main{font-size:22px}
+  .download-first-copy a.trial-launch .trial-limit{font-size:14px}
+  .download-first-actions{gap:12px}
+  .download-first-actions .btn{width:100%;min-height:59px;font-size:17px}
+  #pricing{padding:39px 0 28px}
+  #pricing .pricing{gap:13px}
+  #pricing .price{padding:18px 9px;border-radius:20px;min-height:175px}
+  #pricing .price h3{font-size:16px;line-height:1.5;margin:0 0 8px}
+  #pricing .price strong{font-size:clamp(20px,5.8vw,27px);margin:7px 0}
+  #pricing .price small{font-size:12px;line-height:1.6}
+  .simple-promo h2{font-size:26px}
+  .policy-details{margin-top:0}
+  .cta{padding:32px 0}
+}
+@media(max-width:360px){
+  .download-first-copy a.trial-launch .trial-main{font-size:20px}
+  .download-first-copy a.trial-launch .trial-limit{font-size:12.5px}
+  #pricing .price{padding:14px 6px;min-height:172px}
+  #pricing .price strong{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){
+ .download-first-copy a.trial-launch::before{animation:none}
+ .download-first-copy a.trial-launch{transition:none}
+}
