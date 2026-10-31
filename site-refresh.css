@@ -1,0 +1,19 @@
+/* PaperPen V132 landing-only refresh. No changes to application or auth. */
+.download-first{background:radial-gradient(circle at 35% 5%,rgba(17,213,223,.17),transparent 48%),linear-gradient(145deg,#041a36 0%,#07345a 62%,#0b294a 100%);}
+.download-first-copy{max-width:780px;}
+.download-first-copy #platformHeadline{margin:18px 0 6px;font-weight:900;line-height:1.3;letter-spacing:.1px;color:#fff;}
+.download-first-copy #platformHeadline span{color:#5fe8ea;white-space:nowrap;text-shadow:0 2px 12px rgba(12,221,232,.26);font-weight:900;direction:ltr;unicode-bidi:isolate;display:inline-block;}
+.download-first-copy .hero-pocket{font-size:clamp(30px,4vw,52px);line-height:1.35;color:#fff;font-weight:900;margin:8px 0 16px;text-shadow:0 2px 0 #195778,0 0 20px rgba(16,213,213,.42);}
+.download-first-copy #platformCopy{color:#c6e4ef;margin:0 0 22px;font-weight:700;line-height:1.7;}
+.download-first-copy .trial-launch{position:relative;overflow:hidden;isolation:isolate;display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;padding:11px 21px;border:2px solid #b7f8ff;border-radius:999px;background:linear-gradient(155deg,#f5ffff 0%,#a7e9f1 15%,#12c3d0 44%,#077b92 70%,#d3ffff 100%);color:#032a43;font-size:16px;font-weight:900;box-shadow:inset 0 1px 2px #fff,0 0 0 2px rgba(28,218,235,.32),0 0 17px rgba(11,221,243,.56),0 9px 22px rgba(0,0,0,.27);text-shadow:0 1px 0 rgba(255,255,255,.5);transition:transform .2s ease,box-shadow .2s ease;}
+.download-first-copy .trial-launch span{font-size:12px;background:rgba(0,42,69,.13);padding:2px 9px;border-radius:999px;}
+.download-first-copy .trial-launch::before{content:"";position:absolute;top:-50%;bottom:-50%;left:-35%;width:26%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.84),transparent);transform:skewX(-24deg);animation:pp-shine 4s ease-in-out infinite;pointer-events:none;z-index:-1;}
+.download-first-copy .trial-launch:hover,.download-first-copy .trial-launch:focus-visible{transform:translateY(-2px);box-shadow:inset 0 1px 3px #fff,0 0 0 2px rgba(28,218,235,.5),0 0 27px rgba(11,221,243,.8);}
+.download-first-actions .btn{border:1px solid rgba(207,250,255,.42);box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 9px 20px rgba(0,0,0,.16);}
+.download-first-actions .btn-app-download{border:2px solid #bdfaff;background:linear-gradient(180deg,#78f7fc 0%,#0dccd4 68%,#09abbc 100%);box-shadow:inset 0 1px 2px #fff,0 0 15px rgba(13,205,212,.35),0 12px 25px rgba(0,0,0,.21);}
+.download-first-actions .hero-secondary{background:linear-gradient(180deg,rgba(236,250,255,.25),rgba(21,66,106,.52));border:1px solid rgba(217,241,255,.45);color:#fff;}
+.promo-strip>.promo-card:first-child{border:2px solid rgba(16,213,213,.5);box-shadow:0 12px 28px rgba(4,53,86,.2);}
+.promo-strip>.promo-card:first-child img{object-fit:contain;background:#f8fafc;max-height:590px;}
+@keyframes pp-shine{0%,75%{left:-35%}100%{left:135%}}
+@media(max-width:760px){.download-first{padding:33px 0 38px}.download-first-copy #platformHeadline{font-size:clamp(26px,7vw,36px);margin:18px 0 5px}.download-first-copy .hero-pocket{font-size:clamp(32px,8vw,40px);margin:6px 0 14px}.download-first-copy .trial-launch{font-size:15px;padding:10px 15px;max-width:100%}.download-first-copy #platformCopy{font-size:14px;margin-bottom:18px}.download-first-actions{gap:12px}.download-first-actions .btn{width:100%;min-height:57px;font-size:17px}.simple-promo .promo-card{flex-basis:min(75vw,325px)}}
+@media(prefers-reduced-motion:reduce){.download-first-copy .trial-launch::before{animation:none}.download-first-copy .trial-launch{transition:none}}
