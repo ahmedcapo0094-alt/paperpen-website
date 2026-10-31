@@ -14,7 +14,7 @@ fi
 grep -q 'checkout.js?v=132-checkout' "$PAGE"
 test -s public/checkout.js
 test -s public/checkout.css
-echo 'PaperPen checkout presentation and manual-request flow ready; promo remains gated pending server-side authorization.'
+echo 'PaperPen checkout manual-payment and FB100 reservation request flow staged.'
 # Approved admin-only live request reminder while the admin page is open.
 ADMIN=public/admin/index.html
 if [ -s "$ADMIN" ] && ! grep -q '/checkout-admin.js?v=132-checkout' "$ADMIN"; then
@@ -29,3 +29,12 @@ if [ -s "$ADMIN" ]; then
   sed -i '/^  const prompt=plan===/i\  const allowedAmount=plan==="extra_employee"?prices.extraEmployee:plan==="renewal"?prices.renewal:plan==="base"?prices.effectiveBase:null;\n  if(allowedAmount===null){alert("هذه الباقة تحتاج مراجعة تفعيل منفصلة؛ لا تعتمدها كتفعيل أساسي.");return;}\n  if(!Number.isSafeInteger(requestedAmount)||requestedAmount!==allowedAmount){alert("المبلغ المطلوب لا يطابق السعر المعتمد حاليًا. راجع تحويل العميل والسعر الأصلي قبل أي تفعيل.");return;}\n  if(plan==="base"&&s.licenseStatus==="paid"){alert("هذا المحل مشترك بالفعل. راجع نوع الطلب.");return;}\n  if(plan!=="base"&&s.licenseStatus!=="paid"){alert("الإضافة والتجديد يحتاجان اشتراكًا مدفوعًا قائمًا.");return;}' "$ADMIN"
   grep -q 'allowedAmount=plan===' "$ADMIN"
 fi
+
+# FB100 manual-admin coupon reservation / activation, quota stored in admin-only siteRevisions.
+cp coupon-admin.js public/coupon-admin.js
+if [ -s "$ADMIN" ] && ! grep -q 'coupon-admin.js?v=fb100-1' "$ADMIN"; then
+  sed -i 's|</body>|<script type="module" src="/coupon-admin.js?v=fb100-1"></script>\n</body>|' "$ADMIN"
+fi
+test -s public/coupon-admin.js
+grep -q 'coupon-admin.js?v=fb100-1' "$ADMIN"
+echo 'FB100 admin-only coupon reservation enabled in site build (runtime Firestore role verification required).'
