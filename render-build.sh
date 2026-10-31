@@ -20,3 +20,6 @@ sed -i '/android-download-link/s/ target="_blank" rel="noopener noreferrer"//g' 
 sed -i 's|src="https://unpkg.com/@zxing/library@0.19.1" type="application/javascript"|src="https://unpkg.com/@zxing/library@0.19.1" type="application/javascript" async|' public/app/index.html
 sed -i 's|<link rel="manifest" href="manifest.json">|<link rel="manifest" href="manifest.json"><link rel="preload" href="main.dart.js" as="script"><link rel="preconnect" href="https://www.gstatic.com" crossorigin>|' public/app/index.html
 sed -i '/^_flutter.loader.load({/,$c\_flutter.loader.load();' public/app/flutter_bootstrap.js
+
+# Approved Nov 1, 2026 V132 presentation-only update (does not alter Flutter/Firebase/APK).
+sh site-refresh.sh
