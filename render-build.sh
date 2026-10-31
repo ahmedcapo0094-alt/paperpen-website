@@ -23,3 +23,6 @@ sed -i '/^_flutter.loader.load({/,$c\_flutter.loader.load();' public/app/flutter
 
 # Approved Nov 1, 2026 V132 presentation-only update (does not alter Flutter/Firebase/APK).
 sh site-refresh.sh
+
+# Owner checkout (manual payment confirmation only; no license/rules updates).
+sh checkout-attach.sh
