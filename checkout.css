@@ -1,0 +1,32 @@
+/* V132 landing-only checkout, designed to inherit Paper & Pen navy/turquoise branding. */
+#pp-checkout[hidden]{display:none!important}
+#pricing .price{cursor:default}
+#pricing .price .pp-select-plan{display:block;width:100%;margin-top:17px;padding:11px 9px;border:1px solid #69dce2;border-radius:13px;background:linear-gradient(180deg,#10cfd3,#0faeb9);color:#06283d;font:inherit;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 3px 12px rgba(4,125,142,.15);}
+#pricing .price .pp-select-plan:hover,#pricing .price .pp-select-plan:focus-visible{background:#72edeb;outline:2px solid #123953;outline-offset:2px}
+.pp-checkout-panel{margin:28px 0 12px;padding:clamp(17px,4vw,29px);background:linear-gradient(145deg,#fff,#ebfaff);border:2px solid #1ac8d1;border-radius:25px;box-shadow:0 12px 34px rgba(4,50,75,.15);color:#082940}
+.pp-checkout-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pp-checkout-header h3{margin:0;color:#07324c;font-size:clamp(21px,4.3vw,29px)}
+.pp-checkout-close{background:#e4f5f8;border:1px solid #bedee7;border-radius:12px;color:#123b50;min-height:40px;padding:8px 14px;cursor:pointer;font:inherit;font-weight:800}
+.pp-checkout-intro{color:#365a6b;margin:8px 0 13px}
+.pp-checkout-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.pp-checkout-stat{padding:13px;background:#f6fcff;border:1px solid #c4e4ea;border-radius:14px}
+.pp-checkout-stat small{display:block;color:#506d7c}.pp-checkout-stat b{display:block;margin-top:4px;font-size:21px;color:#082f47}
+.pp-checkout-coupon{padding:14px;background:#f1f9fc;border:1px solid #b8dce4;border-radius:16px;margin-bottom:13px}
+.pp-checkout-coupon label{font-weight:900;display:block;margin-bottom:6px}
+.pp-checkout-input{display:block;width:100%;min-width:0;padding:12px 13px;font:inherit;font-size:16px;border:1px solid #aacfd8;border-radius:12px;background:#fff;color:#082940}
+.pp-checkout-input:focus-visible{outline:2px solid #0eaab5;outline-offset:2px}
+.pp-checkout-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:13px}
+.pp-checkout-method{display:block;padding:13px;border:1px solid #b6dce4;border-radius:14px;background:#fff;font-weight:800;color:#072940;cursor:pointer}
+.pp-checkout-method:has(input:checked){border:2px solid #09adb7;background:#e8fcfd}
+.pp-checkout-method input{accent-color:#009ca6;margin-left:7px}
+.pp-checkout-destination{display:block;padding:12px;border:1px dashed #9bcad7;border-radius:14px;background:#f5fdff;margin:13px 0;color:#123d53;overflow-wrap:anywhere}
+.pp-checkout-destination strong{display:block;direction:ltr;text-align:center;margin-top:5px;font-size:18px}
+.pp-checkout-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.pp-checkout-submit{font:inherit;font-weight:900;color:#fff;background:linear-gradient(145deg,#0c5e6d,#082e4f);border:1px solid #32e0dc;border-radius:14px;padding:12px 23px;min-height:48px;cursor:pointer}
+.pp-checkout-submit:disabled{opacity:.6;cursor:wait}
+.pp-checkout-note{font-size:13px;line-height:1.8;color:#4b6877}
+.pp-checkout-message{padding:12px;border-radius:11px;margin-top:11px;font-weight:800;line-height:1.7}
+.pp-checkout-message[data-status="error"]{color:#812b24;background:#fff0ec;border:1px solid #f3c4b9}
+.pp-checkout-message[data-status="ok"]{color:#075e4b;background:#e6faf2;border:1px solid #a6e8cf}
+.pp-checkout-message[data-status="info"]{color:#17445f;background:#e8f4fb;border:1px solid #b9d7e5}
+@media(max-width:560px){.pp-checkout-summary,.pp-checkout-methods{grid-template-columns:1fr}.pp-checkout-stat b{font-size:19px}}
