@@ -24,8 +24,8 @@ Object.keys(plans).forEach((key,i)=>{if(!cardList[i])return;const button=documen
 const wrap=document.createElement('section');wrap.id='pp-checkout';wrap.hidden=true;wrap.setAttribute('aria-label','طلب دفع الاشتراك');
 wrap.innerHTML=`<div class="pp-checkout-panel" dir="rtl">
 <div class="pp-checkout-header"><h3>💳 إكمال طلب الدفع — <span id="ppPlanName"></span></h3><button type="button" class="pp-checkout-close" id="ppClose">إغلاق ×</button></div>
-<p class="pp-checkout-intro">اختار طريقة الدفع، وبلّغنا بالتحويل لمراجعته. مش هنفعّل الاشتراك قبل التأكد من وصول الفلوس.</p>
-<div class="pp-checkout-summary"><div class="pp-checkout-stat"><small>السعر الأساسي</small><b id="ppBasePrice">—</b></div><div class="pp-checkout-stat"><small>المبلغ المطلوب</small><b id="ppFinalPrice">—</b></div></div>
+<p class="pp-checkout-intro">اختار وسيلة الدفع، حوّل المبلغ، وبعدها ابعتلنا بيانات التحويل للتفعيل.</p>
+<div class="pp-checkout-summary"><div class="pp-checkout-stat"><small>سعر الباقة</small><b id="ppBasePrice">—</b></div><div class="pp-checkout-stat"><small>المبلغ المطلوب</small><b id="ppFinalPrice">—</b></div></div>
 <div class="pp-checkout-coupon" id="ppCouponBlock"><label for="ppCoupon">كود الخصم (أول اشتراك فقط)</label><input class="pp-checkout-input" id="ppCoupon" autocomplete="off" maxlength="16" placeholder="مثال: FB100" dir="ltr" style="text-align:right"><p class="pp-checkout-note" id="ppCouponInfo">الكود بيتراجع يدويًا قبل اعتماد الخصم لأول 100 محل. ما تحولش مبلغ مخفّض قبل تأكيد أهليتك من الإدارة.</p></div>
 <div id="ppLoginRequired" hidden><p class="pp-checkout-message" data-status="info">لازم تدخل بحساب صاحب المحل الأول. هنحتفظ بالباقة اللي اخترتها.</p><div class="pp-checkout-actions"><a class="pp-checkout-submit" href="#web-register" id="ppGoRegister">إنشاء حساب / تسجيل الدخول</a></div></div>
 <div id="ppPayForm" hidden>
@@ -34,9 +34,9 @@ wrap.innerHTML=`<div class="pp-checkout-panel" dir="rtl">
 <div class="pp-checkout-destination" id="ppPaymentDestination" hidden>التحويل إلى<strong></strong></div>
 <label for="ppSender" style="font-weight:900;display:block;margin:11px 0 6px">رقم أو عنوان الحساب اللي حوّلت منه *</label><input id="ppSender" class="pp-checkout-input" required maxlength="100" autocomplete="off" placeholder="بيانات حساب التحويل">
 <label for="ppTransferRef" style="font-weight:900;display:block;margin:11px 0 6px">مرجع عملية التحويل (اختياري)</label><input id="ppTransferRef" class="pp-checkout-input" maxlength="90" placeholder="رقم العملية إن وجد">
-<p class="pp-checkout-note">الإيصال المصوّر اختياري، لكن رفع الصور مش متاح في النموذج الحالي. احتفظ بالإيصال للمراجعة عند الطلب.</p>
+<p class="pp-checkout-note">احتفظ بإيصال التحويل لحين تأكيد الدفع من الإدارة.</p>
 <div class="pp-checkout-actions"><button type="button" class="pp-checkout-submit" id="ppSendRequest">أرسلت التحويل — إرسال طلب المراجعة</button></div>
-<p class="pp-checkout-note">تأكيد الطلب مش معناه إن الدفع وصل أو إن الاشتراك اتفعّل. المراجعة والتفعيل من لوحة الإدارة فقط.</p>
+<p class="pp-checkout-note">هنراجع وصول التحويل ونحدث حالة طلبك.</p>
 </div><div id="ppCheckoutMsg" class="pp-checkout-message" aria-live="polite" hidden></div>
 </div>`;
 section.querySelector('.wrap').appendChild(wrap);
@@ -105,7 +105,7 @@ build();currentPlan=plan;couponStage='';
 const box=$('pp-checkout');box.hidden=false;$('ppPlanName').textContent=plans[plan].label;
 $('ppCouponBlock').hidden=plan!=='base';$('ppCoupon').value='';promoCode='';msg('');
 $('ppPayForm').hidden=true;$('ppLoginRequired').hidden=true;
-box.scrollIntoView({behavior:'smooth',block:'center'});
+box.style.scrollMarginTop='110px';box.scrollIntoView({behavior:'smooth',block:'start'});
 try{
 if(!currentUser){$('ppLoginRequired').hidden=false;msg('سجّل الدخول أو أنشئ حسابك الأول؛ الباقة هتفضل محفوظة.');return;}
 await loadPublicInfo();updatePrice();
@@ -126,11 +126,11 @@ msg(`عندك طلب قائم رقم ${store.activationRequestCode||'—'} — $
 }
 if(plan==='base'&&store.licenseStatus==='paid')throw Error('already-paid');
 if(plan!=='base' && store.licenseStatus!=='paid')throw Error('requires-paid');
-if(plan==='extra_employee_renewal')throw Error('extra-renew-manual');
+if(plan==='extra_employee_renewal'&&Number(store.extraEmployeeSeats||0)<1)throw Error('no-extra-employee');
 $('ppPayForm').hidden=false;$('ppAccountState').textContent=`الحساب: ${profile.storeName||store.storeName||'محلك'} — صاحب المحل`;
 drawMethods();
 }catch(err){console.error('checkout initialization failed',err?.code||err?.message);
-const labels={'verify-email':'لازم تؤكد البريد الإلكتروني من رسالة التسجيل قبل طلب الدفع.','owner-only':'الشراء متاح لحساب صاحب المحل فقط.','store-not-found':'بيانات المحل مش مكتملة. ادخل بحساب صاحب المحل أولًا.','locked':'الحساب موقوف ولا يمكن طلب شراء جديد.','already-paid':'الاشتراك الأساسي مفعل بالفعل. اختار تجديد أو إضافة.','requires-paid':'الإضافة أو التجديد متاحين بعد تفعيل الباقة الأساسية.', 'extra-renew-manual':'تجديد الموظف الإضافي محتاج مراجعة خاصة من الإدارة قبل تحويل أي مبلغ؛ لن نستقبل دفعة لا نقدر نفعلها تلقائيًا.'};
+const labels={'verify-email':'لازم تؤكد البريد الإلكتروني من رسالة التسجيل قبل طلب الدفع.','owner-only':'الشراء متاح لحساب صاحب المحل فقط.','store-not-found':'بيانات المحل مش مكتملة. ادخل بحساب صاحب المحل أولًا.','locked':'الحساب موقوف ولا يمكن طلب شراء جديد.','already-paid':'الاشتراك الأساسي مفعل بالفعل. اختار تجديد أو إضافة.','requires-paid':'الإضافة أو التجديد متاحين بعد تفعيل الباقة الأساسية.', 'no-extra-employee':'لا يوجد موظف إضافي على اشتراك المحل حاليًا. اختار إضافة موظف أولًا.'};
 msg(labels[err?.message]||'تعذر تحميل بيانات الدفع من Firebase. مش هنستقبل طلب غير مكتمل. حاول تاني.','error');
 }
 }
