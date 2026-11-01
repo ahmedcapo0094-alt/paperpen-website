@@ -88,11 +88,51 @@ async function finalize(storeId){
  document.getElementById('refreshBtn')?.click();
  }catch(e){safeMessage(e);}
 }
+// One existing extra employee seat's annual renewal is a manual invoice, not
+// a new store license or an additional seat. Admin only, after verifying money.
+async function approveExtraEmployeeRenewal(id){
+  if(!await verifyAdmin())throw Error('owner-only-admin');
+  const storeRef=doc(db,'Stores',id),configRef=doc(db,'appConfig','site_public');
+  const [before,cfg]=await Promise.all([getDoc(storeRef),getDoc(configRef)]);
+  const preview=before.data(),price=Number(cfg.data()?.pricing?.extraRenewal??200);
+  if(!before.exists()||!validPrice(price))throw Error('invalid-renewal-price');
+  if(preview.activationRequestPlan!=='extra_employee_renewal'||preview.activationRequestStatus!=='pending')throw Error('invalid-request');
+  if(!confirm('هل تأكدت من وصول '+price+' ج.م لتجديد موظف إضافي واحد؟ لن يتغير عدد المقاعد ولا مدة الاشتراك الأساسي.'))return;
+  await runTransaction(db,async tx=>{
+    const [snapshot,pricingDoc]=await Promise.all([tx.get(storeRef),tx.get(configRef)]);
+    if(!snapshot.exists())throw Error('store-not-found');
+    const st=snapshot.data();
+    const expected=Number(pricingDoc.data()?.pricing?.extraRenewal??200);
+    if(!validPrice(expected)||st.licenseStatus!=='paid'||st.activationRequestStatus!=='pending'||
+       st.activationRequestPlan!=='extra_employee_renewal'||Number(st.extraEmployeeSeats||0)<1||
+       Number(st.activationRequestAmountEgp)!==expected||
+       !String(st.activationPaymentSender||'').trim()||
+       !['instapay','wallet'].includes(st.activationPaymentMethod)||st.activationPromoCodeRequested)throw Error('invalid-renewal-request');
+    tx.update(storeRef,{
+      extraEmployeeRenewalLastPaidAt:serverTimestamp(),
+      extraEmployeeRenewalPayments:Number(st.extraEmployeeRenewalPayments||0)+1,
+      extraEmployeeAnnualRenewalPriceEgp:expected,
+      activationRequestStatus:'approved',
+      activationReviewedAt:serverTimestamp(),
+      updatedAt:serverTimestamp()
+    });
+  });
+  try{
+    await addDoc(collection(db,'commissions'),{
+      type:'admin_action',actionType:'extra_employee_renewal_payment',
+      label:'تجديد موظف إضافي واحد',storeId:id,amountEgp:price,
+      adminEmail:auth.currentUser?.email||'',createdAt:serverTimestamp()
+    });
+  }catch(error){console.warn('Renewal confirmed; audit entry requires review',error?.code||error?.message);}
+  alert('تم إثبات سداد تجديد موظف إضافي واحد دون تغيير مدة اشتراك المحل أو عدد المقاعد.');
+  document.getElementById('refreshBtn')?.click();
+}
+
 window.approveRequest=async id=>{
  if(!adminReady){alert('برجاء تسجيل الدخول بحساب مدير المنصة أولًا.');return;}
  try{
  const snap=await getDoc(doc(db,'Stores',id));if(!snap.exists()){alert('المحل غير موجود.');return;}
- const s=snap.data();if(s.activationPromoCodeRequested!=='FB100')return oldApprove?.(id);
+ const s=snap.data();if(s.activationRequestPlan==='extra_employee_renewal')return await approveExtraEmployeeRenewal(id);if(s.activationPromoCodeRequested!=='FB100')return oldApprove?.(id);
  if(s.activationPromoStage==='reservation_pending')return reserve(id);
  if(s.activationPromoStage==='reservation_confirmed'){alert('الكود اتحجز. استنى العميل يحول المبلغ ويبلّغنا من الموقع قبل التفعيل.');return;}
  if(s.activationPromoStage==='payment_reported')return finalize(id);
