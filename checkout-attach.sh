@@ -19,7 +19,10 @@ echo 'PaperPen checkout manual-payment and FB100 reservation request flow staged
 ADMIN=public/admin/index.html
 if [ -s "$ADMIN" ] && ! grep -q '/checkout-admin.js?v=132-checkout' "$ADMIN"; then
   cp checkout-admin.js public/checkout-admin.js
-  sed -i 's|</body>|<script type="module" src="/checkout-admin.js?v=132-checkout-02"></script>\n</body>|' "$ADMIN"
+  cp pp-admin-alerts.css public/pp-admin-alerts.css
+  cp pp-admin-notify-sw.js public/admin/pp-admin-notify-sw.js
+  sed -i 's|</head>|<link rel="stylesheet" href="/pp-admin-alerts.css?v=132-admin-notify-01">\n</head>|' "$ADMIN"
+  sed -i 's|</body>|<script type="module" src="/checkout-admin.js?v=132-admin-notify-01"></script>\n</body>|' "$ADMIN"
 fi
 
 # Harden the existing admin's manual approval against client-edited payment amounts.
@@ -35,6 +38,9 @@ cp coupon-admin.js public/coupon-admin.js
 if [ -s "$ADMIN" ] && ! grep -q 'coupon-admin.js?v=fb100-2' "$ADMIN"; then
   sed -i 's|</body>|<script type="module" src="/coupon-admin.js?v=fb100-2"></script>\n</body>|' "$ADMIN"
 fi
+test -s public/pp-admin-alerts.css
+test -s public/admin/pp-admin-notify-sw.js
+grep -q 'pp-admin-alerts.css?v=132-admin-notify-01' "$ADMIN"
 test -s public/coupon-admin.js
 grep -q 'coupon-admin.js?v=fb100-2' "$ADMIN"
 echo 'FB100 admin-only coupon reservation enabled in site build (runtime Firestore role verification required).'
