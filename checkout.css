@@ -34,3 +34,20 @@
 /* Coupon reservation happens before money transfer: show only the call to reserve. */
 #ppPayForm.pp-reserving #ppPaymentMethods,#ppPayForm.pp-reserving #ppPaymentDestination,#ppPayForm.pp-reserving #ppSender,#ppPayForm.pp-reserving #ppTransferRef,#ppPayForm.pp-reserving label[for="ppSender"],#ppPayForm.pp-reserving label[for="ppTransferRef"]{display:none!important}
 #ppPayForm.pp-reserving .pp-checkout-note{font-weight:700}
+/* Mobile checkout v2: compact payment summary, legible header, no blocking warning card. */
+#pp-checkout{scroll-margin-top:125px}
+#pricing .wrap{scroll-margin-top:115px}
+.pp-checkout-panel{margin-top:18px;padding:clamp(14px,3.4vw,24px)}
+.pp-checkout-header{align-items:center}
+.pp-checkout-header h3{font-size:clamp(18px,4.6vw,26px);line-height:1.35}
+.pp-checkout-intro{font-size:14px;line-height:1.55;margin:6px 0 10px}
+.pp-checkout-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.pp-checkout-stat{min-width:0;padding:12px 10px}
+.pp-checkout-stat small{font-size:13px}
+.pp-checkout-stat b{font-size:clamp(16px,4.3vw,22px);line-height:1.6;overflow-wrap:anywhere}
+.pp-checkout-coupon{padding:12px}
+.pp-checkout-note{font-size:12px;line-height:1.55}
+.pp-checkout-actions{margin:12px 0 4px}
+.pp-checkout-submit{width:100%;text-align:center}
+.pp-checkout-message[data-status="error"]{color:#143c51;background:#f0f8fc;border-color:#bcdae3;font-size:14px}
+@media(max-width:560px){.pp-checkout-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.pp-checkout-methods{grid-template-columns:repeat(2,minmax(0,1fr))}.pp-checkout-stat b{font-size:clamp(15px,4.2vw,20px)}.pp-checkout-panel{border-width:1px}.pp-checkout-header h3{max-width:100%}}
